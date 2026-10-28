@@ -12,7 +12,8 @@ from pathlib import Path
 
 APP_DIR = Path(__file__).resolve().parent
 DATA_DIR = APP_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
+if not os.environ.get("VERCEL"):     
+    DATA_DIR.mkdir(exist_ok=True)
 UNIVERSE_FILE = DATA_DIR / "nifty500_stocks.csv"
 SCAN_FILE = DATA_DIR / "latest_scan.csv"
 PORTFOLIO_FILE = DATA_DIR / "portfolio.json"
