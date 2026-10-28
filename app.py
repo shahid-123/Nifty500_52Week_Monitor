@@ -7,6 +7,8 @@ import pandas as pd
 import numpy as np
 import yfinance as yf
 import json, re, time, traceback
+import os
+from pathlib import Path
 
 APP_DIR = Path(__file__).resolve().parent
 DATA_DIR = APP_DIR / "data"
@@ -14,9 +16,13 @@ DATA_DIR.mkdir(exist_ok=True)
 UNIVERSE_FILE = DATA_DIR / "nifty500_stocks.csv"
 SCAN_FILE = DATA_DIR / "latest_scan.csv"
 PORTFOLIO_FILE = DATA_DIR / "portfolio.json"
-CACHE_DIR = DATA_DIR / "history_cache"
-CACHE_DIR.mkdir(exist_ok=True)
+# Use a writable directory on Vercel; preserve local behavior.
+if os.environ.get("VERCEL"):
+    CACHE_DIR = Path("/tmp/history_cache")
+else:
+    CACHE_DIR = BASE_DIR / "data" / "history_cache"
 
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 app = Flask(__name__)
 state_lock = Lock()
 scan_state = {"running": False, "total": 0, "completed": 0, "message": "Ready", "started_at": None, "finished_at": None, "error": None}
