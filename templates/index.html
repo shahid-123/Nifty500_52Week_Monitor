@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>52W Lens · Nifty 500 Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">52</div><div><div class="brand-name">52W LENS</div><div class="brand-sub">MARKET INTELLIGENCE</div></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <button class="nav-item active" data-tab="overview"><span class="nav-icon">◫</span> Market overview</button>
+    <button class="nav-item" data-tab="breakouts"><span class="nav-icon">↗</span> Highs & breakouts <span class="nav-pill" id="navBreakoutCount">—</span></button>
+    <button class="nav-item" data-tab="stock"><span class="nav-icon">⌁</span> Stock intelligence</button>
+    <button class="nav-item" data-tab="portfolio"><span class="nav-icon">▤</span> Investment tracker</button>
+    <div class="sidebar-bottom">
+      <div class="sidebar-note"><div class="pulse"></div><div><strong>Research workspace</strong><small>Daily EOD monitoring</small></div></div>
+      <div class="sidebar-foot">Market data via Yahoo Finance<br>For research purposes only</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">INDIA · CASH EQUITIES</div><h1 id="pageTitle">Market overview</h1></div>
+      <div class="top-actions"><span class="market-status"><i></i> Daily data</span><button class="btn btn-primary" id="scanBtn"><span>↻</span> Run universe scan</button></div>
+    </header>
+
+    <section class="tab-panel active" id="tab-overview">
+      <div class="hero">
+        <div><div class="hero-kicker">NIFTY 500 MONITOR</div><h2>Find strength before<br><em>the crowd notices.</em></h2><p>Track 52-week highs, fresh breakouts, long-gap breakouts and the fundamentals behind price strength.</p></div>
+        <div class="hero-art"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="hero-bars"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="hero-spark">↗</div></div>
+      </div>
+      <div class="metric-grid">
+        <div class="metric-card"><div class="metric-label">UNIVERSE SIZE</div><div class="metric-value" id="universeMetric">{{ universe_count }}</div><div class="metric-foot">Stocks loaded</div><div class="metric-icon blue">▦</div></div>
+        <div class="metric-card"><div class="metric-label">AT 52-WEEK HIGH</div><div class="metric-value" id="highMetric">—</div><div class="metric-foot">Fresh price highs</div><div class="metric-icon green">↗</div></div>
+        <div class="metric-card"><div class="metric-label">LONG-GAP BREAKOUTS</div><div class="metric-value" id="breakMetric">—</div><div class="metric-foot">90+ days since prior breakout</div><div class="metric-icon violet">✦</div></div>
+        <div class="metric-card"><div class="metric-label">WITHIN 5% OF HIGH</div><div class="metric-value" id="nearMetric">—</div><div class="metric-foot">Watchlist candidates</div><div class="metric-icon amber">◎</div></div>
+      </div>
+      <div class="content-grid overview-content-grid">
+        <section class="panel wide">
+          <div class="panel-head">
+            <div>
+              <h3>Breakout watchlist</h3>
+              <p>Fresh highs and stocks approaching their 52-week high</p>
+            </div>
+            <button class="text-btn" data-goto="breakouts">View all →</button>
+          </div>
+          <div id="overviewTable" class="table-wrap">
+            <div class="empty-state">
+              <div class="empty-symbol">↗</div>
+              <strong>No scan results yet</strong>
+              <p>Click Run universe scan to scan the configured stock list in data/nifty500_stocks.csv.</p>
+            </div>
+          </div>
+          <div class="scan-status">
+            <div class="status-row"><span class="status-dot"></span><span id="scanMessage">Ready to scan</span></div>
+            <div class="progress-track"><div id="scanProgress" class="progress-fill"></div></div>
+            <small id="scanMeta">Scan runs in the background</small>
+          </div>
+        </section>
+      </div>
+      <div class="disclaimer">This tool is for research and education, not a buy/sell recommendation. Market data can be delayed, incomplete or unavailable.</div>
+    </section>
+
+    <section class="tab-panel" id="tab-breakouts">
+      <div class="section-intro"><div><div class="eyebrow">PRICE STRENGTH SCANNER</div><p>Identify stocks setting fresh 52-week highs and those breaking out after a long pause.</p></div><div class="button-row"><button class="btn btn-secondary" id="exportBtn">↓ Latest scan CSV</button><button class="btn btn-secondary" id="historyTxtBtn">↓ History TXT</button><button class="btn btn-secondary" id="rollingCsvBtn">↓ 30-day CSV</button></div></div>
+      <div class="filter-bar"><div class="search-box"><span>⌕</span><input id="searchInput" placeholder="Search company, symbol or sector…"></div><select id="statusFilter"><option value="all">All statuses</option><option>Breakout after long gap</option><option>At 52-week high</option><option>Near 52-week high</option><option>Below 52-week high</option><option>No data</option><option>Error</option></select><div class="result-count" id="resultCount">0 stocks</div></div>
+      <div class="panel table-panel"><div id="fullTable" class="table-wrap"><div class="empty-state"><strong>Scan your universe to see results</strong><p>Run universe scan from the top-right.</p></div></div></div>
+      <div class="method-note"><strong>How “long-gap breakout” is defined</strong><p>The latest close is at/above the prior 252-session high and the previous qualifying breakout was at least 90 calendar days earlier. This is a screening heuristic, not a prediction. “Below 52-week high” is calculated from daily adjusted price history.</p></div>
+    </section>
+
+    <section class="tab-panel" id="tab-stock">
+      <div class="section-intro"><div><div class="eyebrow">SINGLE-STOCK DEEP DIVE</div><p>Price structure, moving averages, RSI, returns and company fundamentals in one view.</p></div></div>
+      <div class="stock-search panel"><div class="search-box stock-search-box"><span>⌕</span><input id="stockSymbol" placeholder="Enter NSE symbol e.g. HDFCBANK or RELIANCE"></div><button class="btn btn-primary" id="loadStockBtn">Analyse stock</button><span class="hint">NSE symbol or Yahoo ticker</span></div>
+      <div id="stockEmpty" class="empty-stock panel"><div class="empty-symbol">⌁</div><h3>Choose a stock to inspect</h3><p>Open any row in the scanner or enter a symbol above to load the chart and fundamentals.</p></div>
+      <div id="stockContent" class="hidden">
+        <div class="stock-heading panel"><div><div class="eyebrow" id="stockSector">STOCK PROFILE</div><h2 id="stockName">—</h2><div class="stock-symbol" id="stockTicker">—</div></div><div class="stock-price-block"><div class="stock-price" id="stockPrice">—</div><div class="stock-selected-return" id="stockReturn">Selected timeframe return: —</div><div class="stock-high-distance" id="stockDistance">—</div></div></div>
+        <div class="metric-grid stock-metrics">
+          <div class="metric-card compact"><div class="metric-label">52W HIGH</div><div class="metric-value" id="sHigh">—</div><div class="metric-foot" id="sDistance">—</div></div>
+          <div class="metric-card compact"><div class="metric-label">EMA 20</div><div class="metric-value" id="sEma20">—</div><div class="metric-foot" id="sEma20State">—</div></div>
+          <div class="metric-card compact"><div class="metric-label">EMA 50</div><div class="metric-value" id="sEma50">—</div><div class="metric-foot" id="sEma50State">—</div></div>
+          <div class="metric-card compact"><div class="metric-label">EMA 200</div><div class="metric-value" id="sEma200">—</div><div class="metric-foot" id="sEma200State">—</div></div>
+          <div class="metric-card compact"><div class="metric-label">RSI (14)</div><div class="metric-value" id="sRsi">—</div><div class="metric-foot">Daily timeframe</div></div>
+        </div>
+        <section class="panel chart-panel">
+          <div class="panel-head chart-head"><div><h3>Price & momentum</h3><p>Hover any candle to see historical returns for multiple holding periods</p></div><div class="timeframe-group" id="timeframes"><button data-period="1d">1D</button><button data-period="1w">1W</button><button data-period="1mo">1M</button><button data-period="3mo">3M</button><button data-period="6mo">6M</button><button data-period="1y" class="selected">1Y</button><button data-period="3y">3Y</button><button data-period="5y">5Y</button><button data-period="max">MAX</button></div></div>
+          <div id="priceChart" class="price-chart"></div>
+          <div class="chart-legend"><span><i class="legend-price"></i>Price</span><span><i class="legend-ema20"></i>EMA 20</span><span><i class="legend-ema50"></i>EMA 50</span><span><i class="legend-ema200"></i>EMA 200</span><span><i class="legend-rsi"></i>RSI (14)</span></div>
+        </section>
+        <div class="content-grid fundamentals-grid">
+          <section class="panel"><div class="panel-head"><div><h3>Fundamental snapshot</h3><p>Latest available company metrics</p></div><span class="tiny-badge">YF</span></div><div id="fundamentalGrid" class="fundamental-grid"></div></section>
+          <section class="panel"><div class="panel-head"><div><h3>Breakout context</h3><p>Price behaviour around the high</p></div></div><div id="breakoutContext" class="context-list"></div><div class="info-note"><span>ⓘ</span><p>Fundamental fields may be missing or stale for some tickers. Validate important values with company filings before making decisions.</p></div></section>
+        </div>
+        <section class="panel summary-panel"><div class="panel-head"><div><h3>Company overview</h3><p>Business description, when available</p></div></div><p id="companySummary" class="company-summary">—</p></section>
+      </div>
+    </section>
+
+    <section class="tab-panel" id="tab-portfolio">
+      <div class="section-intro"><div><div class="eyebrow">PLAN · RECORD · MONITOR</div><p>Record your entries, track returns and review a transparent technical/fundamental checklist before investing.</p></div><button class="btn btn-secondary" id="refreshPortfolioBtn">↻ Refresh prices</button></div>
+      <div class="metric-grid portfolio-metrics">
+        <div class="metric-card"><div class="metric-label">TOTAL INVESTED</div><div class="metric-value" id="portfolioInvested">₹0</div><div class="metric-foot">Recorded purchase cost</div></div>
+        <div class="metric-card"><div class="metric-label">CURRENT VALUE</div><div class="metric-value" id="portfolioValue">₹0</div><div class="metric-foot">Based on latest available prices</div></div>
+        <div class="metric-card"><div class="metric-label">UNREALISED P/L</div><div class="metric-value" id="portfolioPnl">₹0</div><div class="metric-foot" id="portfolioReturn">Return: —</div></div>
+      </div>
+      <div class="content-grid portfolio-grid">
+        <section class="panel">
+          <div class="panel-head"><div><h3>Record an investment</h3><p>Enter the actual trade details after you place an order.</p></div><span class="tiny-badge">BUY LOG</span></div>
+          <form id="investmentForm" class="investment-form">
+            <label>Stock symbol<input id="investmentSymbol" placeholder="e.g. SONACOMS or RELIANCE" required></label>
+            <div class="form-two"><label>Quantity<input id="investmentQuantity" type="number" min="1" step="1" placeholder="Shares" required></label><label>Buy price (₹)<input id="investmentBuyPrice" type="number" min="0.01" step="0.01" placeholder="₹ per share" required></label></div>
+            <label>Buy date<input id="investmentBuyDate" type="date" required></label>
+            <label>Notes (optional)<input id="investmentNotes" maxlength="500" placeholder="e.g. breakout retest entry"></label>
+            <div class="investment-cost">Estimated purchase cost <strong id="investmentCost">₹0.00</strong></div>
+            <button class="btn btn-primary" type="submit">＋ Save investment</button>
+            <p class="form-hint">This records your entry; it does not place an order with your broker.</p>
+          </form>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><h3>Buy setup checklist</h3><p>Review trend alignment and available fundamentals.</p></div><span class="tiny-badge">RESEARCH</span></div>
+          <form id="buySetupForm" class="investment-form">
+            <label>Stock symbol<input id="buySetupSymbol" placeholder="e.g. SONACOMS" required></label>
+            <button class="btn btn-secondary" type="submit">Analyse buy setup</button>
+          </form>
+          <div id="buySetupResult" class="buy-setup-result"><div class="empty-state"><strong>No setup analysed yet</strong><p>Enter a symbol to review EMA alignment, RSI, fundamental data and a watch zone.</p></div></div>
+        </section>
+      </div>
+      <section class="panel table-panel portfolio-table-panel">
+        <div class="panel-head"><div><h3>My investments</h3><p>Live value and unrealised return are estimated from the latest available Yahoo Finance close.</p></div><span class="tiny-badge" id="portfolioCount">0 holdings</span></div>
+        <div id="portfolioTable" class="table-wrap"><div class="empty-state"><strong>No investments recorded</strong><p>Add your first investment above to start tracking.</p></div></div>
+      </section>
+      <div class="info-note portfolio-disclaimer"><span>ⓘ</span><p>Prices may be delayed or unavailable. The buy-zone is an observation range based on EMA 20/50, not a guaranteed support level or a buy signal. Fundamentals from data providers can be stale or incomplete. This tracker does not place broker orders.</p></div>
+    </section>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body></html>

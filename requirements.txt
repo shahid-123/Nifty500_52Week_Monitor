@@ -1,0 +1,5 @@
+Flask>=3.0,<4.0
+pandas>=2.1
+numpy>=1.26
+yfinance>=0.2.65
+gunicorn>=22.0,<24.0

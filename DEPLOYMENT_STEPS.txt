@@ -1,0 +1,60 @@
+NIFTY 500 52-WEEK MONITOR — TEST, GITHUB AND VERCEL
+
+A. FIRST: ADD YOUR REAL NIFTY 500 UNIVERSE
+1. Open data\nifty500_stocks.csv in Excel.
+2. Ensure it contains the complete universe, one symbol per row, with a Symbol column (e.g. RELIANCE, TCS, HDFCBANK).
+3. The included file may be only a sample/placeholder. Do not deploy until you confirm the actual stock list is present.
+
+B. TEST LOCALLY (Windows Command Prompt)
+cd /d "C:\Users\HOME\Documents\Stock Market Projects\Nifty500_52Week_Monitor"
+py -3.12 -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python app.py
+
+Open http://127.0.0.1:5000. Trigger Run universe scan. After it finishes, stop the website with Ctrl+C, then run:
+python daily_scan.py
+
+Check these files:
+- data\latest_scan.csv                 full latest universe scan
+- output\latest_scan.csv               copy of full latest scan
+- output\nifty500_52week_history.txt     dated history of qualifying stocks
+- output\nifty500_rolling_30days.csv        qualifying stocks for the latest 30 calendar days
+
+Open the website again with python app.py. Try the three download buttons on Highs & breakouts. Direct links:
+http://127.0.0.1:5000/api/download/history.txt
+http://127.0.0.1:5000/api/download/rolling.csv
+
+C. PUSH TO GITHUB
+1. Create a NEW empty repository on https://github.com (do not add README if this folder already has one).
+2. In Command Prompt, go to the project folder and run:
+   git init
+   git add .
+   git commit -m "Initial Nifty500 52-week monitor"
+   git branch -M main
+   git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
+   git push -u origin main
+Replace the URL with your own repository URL. If git init was already done, do not repeat it. If origin already exists, use `git remote -v` and `git remote set-url origin YOUR-REPOSITORY-URL`.
+
+D. ENABLE THE DAILY SCAN ON GITHUB
+1. Open repository → Settings → Actions → General.
+2. Under Workflow permissions, select “Read and write permissions” and save, if your repository policy permits it.
+3. Open Actions → “Daily Nifty 500 52-week scan” → Run workflow.
+4. Watch the job log. It should run daily_scan.py and commit changed output files.
+5. Verify the output files change in the repository. Schedule is weekdays at 16:45 IST (11:15 UTC); GitHub scheduled jobs can be delayed and market holidays are not specially excluded.
+
+E. DEPLOY TO VERCEL
+1. Sign in to https://vercel.com and choose Add New → Project.
+2. Import the GitHub repository.
+3. Keep Root Directory as the repository root. Leave framework/build settings at automatic/default unless Vercel asks otherwise.
+4. Click Deploy. vercel.json routes requests to the Flask app.
+5. Open the deployed URL and verify the dashboard and downloads.
+6. A successful GitHub Action commit triggers Vercel redeployment, so updated CSV/TXT data is included in the deployment.
+
+IMPORTANT LIMITATIONS
+- This is a lightweight scan dashboard deployment. Vercel's local filesystem is not durable; the GitHub Action is the scheduled scan runner and stores scan outputs in the Git repository.
+- The investment tracker currently stores portfolio entries in a local JSON file. Do not rely on it for persistent records on Vercel. Before using it online, connect PostgreSQL (Neon/Supabase), add authentication, and migrate portfolio storage. Do not put personal holdings in a public GitHub repository.
+- Keep the repository private if your stock data or other files should not be public. Never commit passwords, API keys, or private financial information.
+- Yahoo Finance can throttle requests or return missing data. Check Actions logs; rerun manually if needed.
+- Do not commit `.venv`, personal portfolio files, or large history-cache folders. Review `git status` before the first push.
